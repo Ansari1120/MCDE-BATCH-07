@@ -119,48 +119,22 @@ from sales.vw_order_detail  as c
 --For each combination of category_name and brand_name, return the number of distinct orders and the total revenue. 
 --Keep only combinations that appear in at least 20 distinct orders, and return the top 5 by revenue.
 
-Select Top 5 distinct orders count(o.order_id) as revenue_orders from sales.orders as o
-inner join sales.order_items as oi
-on o.order_id = oi.order_id
-having revenue_orders > oi.quantity
-
-SELECT TOP 5
-    c.category_name,
-    b.brand_name,
-    COUNT(DISTINCT o.order_id) AS revenue_orders,
+select TOP 5  c.category_name, b.brand_name
+    , COUNT(DISTINCT o.order_id) AS revenue_orders,
     SUM(oi.quantity * oi.unit_price) AS total_revenue
-
-FROM sales.orders AS o
-
-INNER JOIN sales.order_items AS oi
-    ON o.order_id = oi.order_id
-
-INNER JOIN sales.products AS p
-    ON oi.product_id = p.product_id
-
-INNER JOIN sales.categories AS c
-    ON p.category_id = c.category_id
-
-INNER JOIN sales.brands AS b
-    ON p.brand_id = b.brand_id
-
-GROUP BY
-    c.category_name,
+from sales.orders AS o
+inner join sales.order_items AS oi  ON o.order_id = oi.order_id
+inner join sales.products AS p  ON oi.product_id = p.product_id
+inner join sales.categories AS c  ON p.category_id = c.category_id
+inner join sales.brands AS b
+ ON p.brand_id = b.brand_idGROUP BYc.category_name,
     b.brand_name
-
-HAVING COUNT(DISTINCT o.order_id) >= 20
-
+having COUNT(DISTINCT o.order_id) >= 20
 ORDER BY total_revenue DESC;
 
 --Q9. (Aggregation across joins, YEAR(), COUNT DISTINCT) For each store 
 --and each order year, return store_name, order_year,
 --the number of distinct orders and total revenue. Sort by store_name, then order_year.
-
-Select s.store_name,o.order_date as order_year from sales.stores as s
-left join sales.orders as o on o.store_id =   s.store_id
-order by s.store_name,order_year asc
-
-
 select
 s.store_name,
 YEAR(o.order_date) AS order_year,
@@ -168,9 +142,9 @@ COUNT(DISTINCT o.order_id) AS total_orders,
 SUM(oi.quantity * oi.list_price) AS total_revenue
 FROM sales.stores AS s
 LEFT JOIN sales.orders AS o
-  ON o.store_id = s.store_id
+ON o.store_id = s.store_id
 LEFT JOIN sales.order_items AS oi
-    ON o.order_id = oi.order_id
+ON o.order_id = oi.order_id
 GROUP BY s.store_name,YEAR(o.order_date)
 ORDER BY s.store_name ASC, order_year ASC;
 --Q10. (Nested subqueries, 4 levels of IN, no joins) Return the first and last names of
